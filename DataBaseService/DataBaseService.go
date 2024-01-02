@@ -38,14 +38,10 @@ func DeleteJobFromDataBase(job Utils.Job) {
 	db.Delete(&job)
 }
 
-func GetJobsPostedByHR(user Utils.HRUser) []uint {
+func GetJobsPostedByHR(user Utils.HRUser) []Utils.Job {
 	var Jobs []Utils.Job
 	db.Where("posted_by=?", user.Id).Find(&Jobs)
-	var ansarray []uint
-	for i := 0; i < len(Jobs); i++ {
-		ansarray = append(ansarray, Jobs[i].Id)
-	}
-	return ansarray
+	return Jobs
 }
 
 func AddSimpleUser(user Utils.User) (bool, uint) {
@@ -60,6 +56,9 @@ func SimpleUserLogin(user Utils.User) bool {
 	pass := user.Password
 	ans := db.Where("id=?", user.Id).Find(&user)
 	if ans == nil {
+		return false
+	}
+	if ans.RowsAffected == 0 {
 		return false
 	}
 	return pass == user.Password
@@ -87,7 +86,7 @@ func FindUsersByJobId(user Utils.User) []Utils.User {
 
 func AddResumeToUser(id int, ResumeAddress string) bool {
 	ans := db.Model(&Utils.User{}).Where("id = ?", id).Update("resume_address", ResumeAddress)
-	if ans == nil {
+	if ans.RowsAffected == 0 {
 		return false
 	}
 	return true
@@ -117,4 +116,13 @@ func CheckResumeExist(user Utils.User) bool {
 		return false
 	}
 	return true
+}
+
+func HRLogin(user Utils.HRUser) bool {
+	pass := user.Password
+	ans := db.Where("id=?", user.Id).Find(&user)
+	if ans.RowsAffected == 0 {
+		return false
+	}
+	return pass == user.Password
 }

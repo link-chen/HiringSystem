@@ -76,3 +76,14 @@ func NotEmployeeApplyer(c *gin.Context) {
 		DataBaseService.CleanUserApply(User)
 	}
 }
+
+func HRLogin(c *gin.Context) {
+	var user Utils.HRUser
+	c.BindJSON(&user)
+	ans := DataBaseService.HRLogin(user)
+	if ans {
+		c.JSON(http.StatusOK, Utils.Response{200, "Success", "Success"})
+	} else {
+		c.JSON(http.StatusOK, Utils.Response{200, "Success", "Failed"})
+	}
+}

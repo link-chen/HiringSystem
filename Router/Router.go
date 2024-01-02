@@ -32,6 +32,7 @@ func Router() *gin.Engine {
 		HRUser.POST("/GetResumeById", Service.GetApplyerResume)
 		HRUser.POST("/SelectUser", Service.EmployeeApplyer)
 		HRUser.POST("/DeleteUser", Service.NotEmployeeApplyer)
+		HRUser.POST("/HRLogin", Service.HRLogin)
 	}
 
 	User := r.Group("/UserService")
