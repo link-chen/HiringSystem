@@ -12,4 +12,5 @@ func GetEmailCode() string {
 
 func GetEmail() string {
 	return email
+
 }
