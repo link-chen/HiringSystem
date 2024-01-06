@@ -67,6 +67,14 @@ func main() {
 }
 ```
 
-The front-end will be released soon.
+Here is the link to the front-end repository:
+
+```
+https://github.com/link-chen/HiringSystem-Front.git
+```
 
 If you want to join us,please send email to 1533842603@qq.com
+
+If anyone wishes to sponsor us,here is the QR code:
+
+![](./WeChat.png)
