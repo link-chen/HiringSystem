@@ -49,6 +49,7 @@ When you first execute this program,use this code:
 
 ```
 func main() {
+	DataBaseService.InitalDataBase()
 	DataBaseService.CreateDataBase()
 }
 ```
