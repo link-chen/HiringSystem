@@ -9,10 +9,17 @@ import (
 
 const (
 	dsn = "root:123456@tcp(localhost:3306)/HiringSystem?charset=utf8mb4&parseTime=True&loc=Local"
+	//默认数据库
 )
 
 var db *gorm.DB
 
+func CreateDataBase() {
+	//第一次执行
+	db.AutoMigrate(&Utils.User{})
+	db.AutoMigrate(&Utils.HRUser{})
+	db.AutoMigrate(&Utils.Job{})
+}
 func InitalDataBase() {
 	Db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
@@ -22,9 +29,6 @@ func InitalDataBase() {
 	if Db != nil {
 		db = Db
 	}
-	//db.AutoMigrate(&Utils.User{})
-	//db.AutoMigrate(&Utils.HRUser{})
-	//db.AutoMigrate(&Utils.Job{})
 }
 
 func AddJobToDataBase(job Utils.Job) bool {
@@ -32,10 +36,14 @@ func AddJobToDataBase(job Utils.Job) bool {
 	fmt.Println(ans)
 	return true
 }
-func DeleteJobFromDataBase(job Utils.Job) {
+func DeleteJobFromDataBase(job Utils.Job) bool {
 
 	db.Model(&Utils.User{}).Where("job_id = ?", job.Id).Update("job_id", 0)
-	db.Delete(&job)
+	second := db.Delete(&job)
+	if second.RowsAffected != 0 {
+		return true
+	}
+	return false
 }
 
 func GetJobsPostedByHR(user Utils.HRUser) []Utils.Job {
@@ -93,7 +101,13 @@ func AddResumeToUser(id int, ResumeAddress string) bool {
 }
 
 func GetResumeAddress(user Utils.User) string {
-	db.Where("id=?", user.Id).Find(&user)
+	ans := db.Where("id=?", user.Id).Find(&user)
+	if ans == nil {
+		fmt.Println("Can not Get Resume Address")
+	} else {
+
+	}
+	fmt.Println(ans.RowsAffected)
 	return user.ResumeAddress
 }
 
@@ -104,6 +118,48 @@ func GetEmail(user Utils.User) string {
 		return ""
 	}
 	return user.Email
+}
+
+func FindUserJobId(user Utils.User) uint {
+	db.Where("id=?", user.Id).Find(&user)
+	return user.JobId
+}
+
+func FindUserApplyJob(user Utils.User) ([]interface{}, error) {
+	rows, err := db.Debug().Raw(`
+    SELECT users.id, jobs.id as job_id, jobs.title, jobs.description, jobs.posted_by, jobs.status
+    FROM users
+    INNER JOIN jobs ON users.job_id = jobs.id
+    WHERE users.id = ?`, user.Id).Rows()
+
+	var ans []interface{}
+	if err != nil {
+		// 处理错误
+		fmt.Println("Error:", err)
+		return ans, err
+	}
+	defer rows.Close()
+
+	// 使用 map 存储查询结果
+	result := make(map[string]interface{})
+	for rows.Next() {
+		err := db.ScanRows(rows, &result)
+		if err != nil {
+			// 处理错误
+			fmt.Println("Error:", err)
+			return ans, err
+		}
+	}
+
+	// 输出查询结果
+	ans = append(ans, (result["id"]))
+	ans = append(ans, (result["job_id"]))
+	ans = append(ans, (result["title"]))
+	ans = append(ans, (result["description"]))
+	ans = append(ans, (result["posted_by"]))
+	ans = append(ans, (result["status"]))
+
+	return ans, nil
 }
 
 func CleanUserApply(user Utils.User) {
@@ -125,4 +181,11 @@ func HRLogin(user Utils.HRUser) bool {
 		return false
 	}
 	return pass == user.Password
+}
+
+func SearchJobStatus(JobId uint) string {
+	var Job Utils.Job
+	db.Where("id=?", JobId).Find(&Job)
+	fmt.Println(Job.Status)
+	return Job.Status
 }

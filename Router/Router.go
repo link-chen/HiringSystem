@@ -37,11 +37,12 @@ func Router() *gin.Engine {
 
 	User := r.Group("/UserService")
 	{
-		User.POST("Regist", Service.Regist)
+		User.POST("/Regist", Service.Regist)
 		User.POST("/Login", Service.Login)
 		User.POST("/ApplyJob", Service.ApplyJob)
 		User.GET("FindAllJobs", Service.FindAllJobs)
 		User.POST("/AddResume", Service.AddResume)
+		User.POST("/SearchApplyedJob", Service.SearchApplyedJob)
 	}
 
 	return r

@@ -12,6 +12,7 @@ import (
 
 func Regist(c *gin.Context) {
 	var User Utils.User
+	c.BindJSON(&User)
 	ans, count := DataBaseService.AddSimpleUser(User)
 	if ans {
 		c.JSON(http.StatusOK, Utils.Response{200, "CreateSuccess", count})
@@ -34,6 +35,11 @@ func Login(c *gin.Context) {
 func ApplyJob(c *gin.Context) {
 	var User Utils.User
 	c.BindJSON(&User)
+	exist := DataBaseService.FindUserJobId(User)
+	if exist != 0 {
+		c.JSON(http.StatusOK, Utils.Response{200, "ApplyFailed", "ApplyExist"})
+		return
+	}
 	ResumeExist := DataBaseService.CheckResumeExist(User)
 	if ResumeExist {
 		ans := DataBaseService.UserApplyJob(User)
@@ -66,5 +72,21 @@ func AddResume(c *gin.Context) {
 	}
 	ans := c.PostForm("id")
 	id, _ := strconv.Atoi(ans)
-	DataBaseService.AddResumeToUser(id, dst)
+	res := DataBaseService.AddResumeToUser(id, dst)
+	if res {
+		c.JSON(http.StatusOK, Utils.Response{200, "Success", "AddResumeSuccess"})
+	} else {
+		c.JSON(http.StatusOK, Utils.Response{200, "Success", "AddResumeFailed"})
+	}
+}
+
+func SearchApplyedJob(c *gin.Context) {
+	var User Utils.User
+	c.BindJSON(&User)
+	ans, err := DataBaseService.FindUserApplyJob(User)
+	if err == nil {
+		c.JSON(http.StatusOK, Utils.Response{200, "Ok", ans})
+	} else {
+		c.JSON(http.StatusOK, "Error")
+	}
 }

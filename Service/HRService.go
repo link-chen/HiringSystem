@@ -27,7 +27,13 @@ func AddJob(c *gin.Context) {
 func DeleteJob(c *gin.Context) {
 	var Job Utils.Job
 	c.BindJSON(&Job)
-	DataBaseService.DeleteJobFromDataBase(Job)
+	ans := DataBaseService.DeleteJobFromDataBase(Job)
+	fmt.Println(ans)
+	if !ans {
+		c.JSON(http.StatusOK, Utils.Response{404, "Failed", "Failed To DeleteJob"})
+	} else {
+		c.JSON(http.StatusOK, Utils.Response{200, "Failed", "DeleteJob Success"})
+	}
 }
 
 func GetPostedJobRequester(c *gin.Context) {
@@ -53,7 +59,7 @@ func GetAppliersByJobId(c *gin.Context) {
 func GetApplyerResume(c *gin.Context) {
 	var User Utils.User
 	c.BindJSON(&User)
-	fmt.Println(DataBaseService.GetResumeAddress(User))
+	fmt.Println(User.Id)
 	c.File(DataBaseService.GetResumeAddress(User))
 }
 
