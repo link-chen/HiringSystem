@@ -1,10 +1,35 @@
 The HiringSystem is a web server which is programmed by go language.
 
+"HiringSystem is a backend server for a recruitment system based on Go language and Vue, with frontend engineering to be released in another repository.
+
 Gin and gorm are used in this project.
 
 Build by go language.
 
 Use mysql 8.0.34 Community.
+
+You need to create a database named HiringSystem,we default the password for the root user to be 123456. So the  code of open mysql are shown like this:
+
+```
+const (
+	dsn = "root:123456@tcp(localhost:3306)/HiringSystem?charset=utf8mb4&parseTime=True&loc=Local"
+	//default database
+)
+var db *gorm.DB
+
+func InitalDataBase() {
+	Db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	if err != nil {
+		panic("failed to connect database")
+	}
+
+	if Db != nil {
+		db = Db
+	}
+}
+```
+
+You can change the configeration of the database whenever you want,just need to make sure that you can open mysql.
 
 We have provide the  go.mod and go.sum,you don't need to create it again.
 

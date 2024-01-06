@@ -9,7 +9,9 @@ import (
 
 const (
 	dsn = "root:123456@tcp(localhost:3306)/HiringSystem?charset=utf8mb4&parseTime=True&loc=Local"
-	//默认数据库
+	//default database
+	//123456 is the password of root user
+	//HiringSystem is the default database
 )
 
 var db *gorm.DB
