@@ -1,6 +1,7 @@
 package Utils
 
 import (
+	"HiringSystem/Config"
 	"github.com/jordan-wright/email"
 	"log"
 	"net/smtp"
@@ -8,14 +9,14 @@ import (
 
 func SendEmail(Target string, Subject string, EmailMessage string) {
 	em := email.NewEmail()
-	em.From = "1533842603@qq.com"
+	em.From = Config.GetEmail() //发送者
 	em.To = []string{Target}
 	// 设置主题
 	em.Subject = Subject
 	// 简单设置文件发送的内容，暂时设置成纯文本
 	em.Text = []byte(EmailMessage)
 	//设置服务器相关的配置
-	err := em.Send("smtp.qq.com:25", smtp.PlainAuth("", "1533842603@qq.com", "gxzrbjgsmxxajjaf", "smtp.qq.com"))
+	err := em.Send("smtp.qq.com:25", smtp.PlainAuth("", Config.GetEmail(), Config.GetEmailCode(), "smtp.qq.com"))
 	if err != nil {
 		log.Fatal(err)
 	}
