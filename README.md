@@ -1,8 +1,8 @@
 The HiringSystem is a web server which is programmed by go language.
 
-HiringSystem is a backend server for a recruitment system based on Go language and Vue, with frontend engineering to be released in another repository.
+HiringSystem is a backend server for a recruitment system based on Go language, with frontend engineering to be released in another repository.
 
-Gin and gorm are used in this project.
+The main part of the backend server is based on gin and gorm. Token component using JWT is under development.In order to get better performance,the Redis and RabbitMQ will be used in this project soon this year.
 
 Build by go language.
 
@@ -75,6 +75,6 @@ https://github.com/link-chen/HiringSystem-Front.git
 
 If you want to join us,please send email to 1533842603@qq.com
 
-If anyone wishes to sponsor us,here is the QR code:
+If anyone  who wishes to sponsor us,here is the QR code:
 
 ![](./WeChat.png)

@@ -22,6 +22,9 @@ func Router() *gin.Engine {
 		c.Next()
 	})
 
+	r.POST("/HRService/HRLogin", Service.HRLogin)
+	r.POST("/UserService/Login", Service.Login)
+
 	HRUser := r.Group("/HRService")
 	{
 		HRUser.POST("/AddJob", Service.AddJob)
@@ -32,13 +35,11 @@ func Router() *gin.Engine {
 		HRUser.POST("/GetResumeById", Service.GetApplyerResume)
 		HRUser.POST("/SelectUser", Service.EmployeeApplyer)
 		HRUser.POST("/DeleteUser", Service.NotEmployeeApplyer)
-		HRUser.POST("/HRLogin", Service.HRLogin)
 	}
 
 	User := r.Group("/UserService")
 	{
 		User.POST("/Regist", Service.Regist)
-		User.POST("/Login", Service.Login)
 		User.POST("/ApplyJob", Service.ApplyJob)
 		User.GET("FindAllJobs", Service.FindAllJobs)
 		User.POST("/AddResume", Service.AddResume)

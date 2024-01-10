@@ -88,7 +88,12 @@ func HRLogin(c *gin.Context) {
 	c.BindJSON(&user)
 	ans := DataBaseService.HRLogin(user)
 	if ans {
-		c.JSON(http.StatusOK, Utils.Response{200, "Success", "Success"})
+		//中间件，添加数据toekn
+		res, _ := createToken()
+		var rw []interface{}
+		rw = append(rw, res)
+		rw = append(rw, "Success")
+		c.JSON(http.StatusOK, Utils.Response{200, "Success", rw})
 	} else {
 		c.JSON(http.StatusOK, Utils.Response{200, "Success", "Failed"})
 	}
