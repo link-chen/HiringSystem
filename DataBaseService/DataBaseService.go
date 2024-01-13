@@ -21,6 +21,10 @@ func CreateDataBase() {
 	hasTable := db.Migrator().HasTable(&Utils.User{})
 	if !hasTable {
 		db.AutoMigrate(&Utils.User{})
+		db.Create(&Utils.User{10000, "123456", "1533842603@qq.com", "", 0})
+		var User Utils.User
+		db.First(&User)
+		db.Delete(&User)
 	}
 	hasTable = db.Migrator().HasTable(&Utils.HRUser{})
 	if !hasTable {
@@ -68,14 +72,14 @@ func GetJobsPostedByHR(user Utils.HRUser) []Utils.Job {
 func AddSimpleUser(user Utils.User) (bool, uint) {
 	ans := db.Create(&user)
 	if ans != nil {
-		return true, user.Id
+		return true, user.UId
 	}
 	return false, 0
 }
 
 func SimpleUserLogin(user Utils.User) bool {
 	pass := user.Password
-	ans := db.Where("id=?", user.Id).Find(&user)
+	ans := db.Where("uid=?", user.UId).Find(&user)
 	if ans == nil {
 		return false
 	}
@@ -86,7 +90,7 @@ func SimpleUserLogin(user Utils.User) bool {
 }
 
 func UserApplyJob(user Utils.User) bool {
-	ans := db.Model(&Utils.User{}).Where("id = ?", user.Id).Update("job_id", user.JobId)
+	ans := db.Model(&Utils.User{}).Where("uid = ?", user.UId).Update("job_id", user.JobId)
 	if ans == nil {
 		return false
 	}
@@ -101,12 +105,12 @@ func SearchAllJobs() []Utils.Job {
 
 func FindUsersByJobId(user Utils.User) []Utils.User {
 	var User []Utils.User
-	db.Where("job_id=?", user.Id).Find(&User)
+	db.Where("job_id=?", user.UId).Find(&User)
 	return User
 }
 
 func AddResumeToUser(id int, ResumeAddress string) bool {
-	ans := db.Model(&Utils.User{}).Where("id = ?", id).Update("resume_address", ResumeAddress)
+	ans := db.Model(&Utils.User{}).Where("uid = ?", id).Update("resume_address", ResumeAddress)
 	if ans.RowsAffected == 0 {
 		return false
 	}
@@ -114,7 +118,7 @@ func AddResumeToUser(id int, ResumeAddress string) bool {
 }
 
 func GetResumeAddress(user Utils.User) string {
-	ans := db.Where("id=?", user.Id).Find(&user)
+	ans := db.Where("uid=?", user.UId).Find(&user)
 	if ans == nil {
 		fmt.Println("Can not Get Resume Address")
 	} else {
@@ -125,7 +129,7 @@ func GetResumeAddress(user Utils.User) string {
 }
 
 func GetEmail(user Utils.User) string {
-	ans := db.Where("id=?", user.Id).Find(&user)
+	ans := db.Where("uid=?", user.UId).Find(&user)
 	if ans == nil {
 		fmt.Println("GetFailed")
 		return ""
@@ -134,16 +138,16 @@ func GetEmail(user Utils.User) string {
 }
 
 func FindUserJobId(user Utils.User) uint {
-	db.Where("id=?", user.Id).Find(&user)
+	db.Where("uid=?", user.UId).Find(&user)
 	return user.JobId
 }
 
 func FindUserApplyJob(user Utils.User) ([]interface{}, error) {
 	rows, err := db.Debug().Raw(`
-    SELECT users.id, jobs.id as job_id, jobs.title, jobs.description, jobs.posted_by, jobs.status
+    SELECT users.uid, jobs.id as job_id, jobs.title, jobs.description, jobs.posted_by, jobs.status
     FROM users
     INNER JOIN jobs ON users.job_id = jobs.id
-    WHERE users.id = ?`, user.Id).Rows()
+    WHERE users.uid = ?`, user.UId).Rows()
 
 	var ans []interface{}
 	if err != nil {
@@ -165,7 +169,7 @@ func FindUserApplyJob(user Utils.User) ([]interface{}, error) {
 	}
 
 	// 输出查询结果
-	ans = append(ans, (result["id"]))
+	ans = append(ans, (result["uid"]))
 	ans = append(ans, (result["job_id"]))
 	ans = append(ans, (result["title"]))
 	ans = append(ans, (result["description"]))
@@ -176,11 +180,11 @@ func FindUserApplyJob(user Utils.User) ([]interface{}, error) {
 }
 
 func CleanUserApply(user Utils.User) {
-	db.Model(&Utils.User{}).Where("id = ?", user.Id).Update("job_id", 0)
+	db.Model(&Utils.User{}).Where("uid = ?", user.UId).Update("job_id", 0)
 }
 
 func CheckResumeExist(user Utils.User) bool {
-	db.Where("id=?", user.Id).Find(&user)
+	db.Where("uid=?", user.UId).Find(&user)
 	if user.ResumeAddress == "" {
 		return false
 	}

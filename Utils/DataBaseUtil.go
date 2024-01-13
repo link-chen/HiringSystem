@@ -9,7 +9,7 @@ type Job struct {
 }
 
 type User struct {
-	Id            uint   `gorm:"primaryKey"`
+	UId           uint   `gorm:"primaryKey"`
 	Password      string `json:"Password"`
 	Email         string `json:"Email"`
 	ResumeAddress string `json:"ResumeAddress"`

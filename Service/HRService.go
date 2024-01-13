@@ -59,7 +59,13 @@ func GetJobsPosted(c *gin.Context) {
 	var HRUser Utils.HRUser
 	c.BindJSON(&HRUser)
 	ans := DataBaseService.GetJobsPostedByHR(HRUser)
-	c.JSON(http.StatusOK, Utils.Response{200, "Success", ans})
+	res, _ := createToken(HRUser.Id, "HR")
+	var rw []interface{}
+	rw = append(rw, res)
+	if ans != nil {
+		rw = append(rw, ans)
+		c.JSON(http.StatusOK, Utils.Response{200, "Success", ans})
+	}
 }
 
 func GetAppliersByJobId(c *gin.Context) {
@@ -74,7 +80,7 @@ func GetApplyerResume(c *gin.Context) {
 	//传入User
 	var User Utils.User
 	c.BindJSON(&User)
-	fmt.Println(User.Id)
+	fmt.Println(User.UId)
 	//res, _ := createToken(123456, "HR")
 	//var rw []interface{}
 	//rw = append(rw, res)

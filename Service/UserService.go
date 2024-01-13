@@ -25,7 +25,7 @@ func Login(c *gin.Context) {
 	var User Utils.User
 	c.BindJSON(&User)
 	ans := DataBaseService.SimpleUserLogin(User)
-	res, _ := createToken(User.Id, "User")
+	res, _ := createToken(User.UId, "User")
 	var rw []interface{}
 	rw = append(rw, res)
 	if ans {
@@ -40,13 +40,15 @@ func Login(c *gin.Context) {
 func ApplyJob(c *gin.Context) {
 	var User Utils.User
 	c.BindJSON(&User)
+	fmt.Println("User.Uid==", User.UId)
 	exist := DataBaseService.FindUserJobId(User)
 	if exist != 0 {
 		c.JSON(http.StatusOK, Utils.Response{200, "ApplyFailed", "ApplyExist"})
+		fmt.Println("applyed")
 		return
 	}
 	ResumeExist := DataBaseService.CheckResumeExist(User)
-	res, _ := createToken(User.Id, "User")
+	res, _ := createToken(User.UId, "User")
 	var rw []interface{}
 	rw = append(rw, res)
 	if ResumeExist {
@@ -68,8 +70,8 @@ func FindAllJobs(c *gin.Context) {
 	ans := DataBaseService.SearchAllJobs()
 	var User Utils.User
 	c.BindJSON(&User)
-	fmt.Println("User.id==", User.Id)
-	res, _ := createToken(User.Id, "User")
+	fmt.Println("User.id==", User.UId)
+	res, _ := createToken(User.UId, "User")
 	var rw []interface{}
 	rw = append(rw, res)
 	rw = append(rw, ans)
@@ -88,7 +90,7 @@ func AddResume(c *gin.Context) {
 	if err := c.SaveUploadedFile(file, dst); err != nil {
 		return
 	}
-	ans := c.PostForm("id")
+	ans := c.PostForm("uid")
 	id, _ := strconv.Atoi(ans)
 	res := DataBaseService.AddResumeToUser(id, dst)
 	token, _ := createToken(uint(id), "User")
@@ -106,8 +108,9 @@ func AddResume(c *gin.Context) {
 func SearchApplyedJob(c *gin.Context) {
 	var User Utils.User
 	c.BindJSON(&User)
+	fmt.Println("User.Uid==", User.UId)
 	ans, err := DataBaseService.FindUserApplyJob(User)
-	res, _ := createToken(User.Id, "User")
+	res, _ := createToken(User.UId, "User")
 	var rw []interface{}
 	rw = append(rw, res)
 	fmt.Println(res)

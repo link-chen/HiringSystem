@@ -2,8 +2,8 @@ package Config
 
 const (
 	//input your email code here
-	code  = ""
-	email = ""
+	code  = "gxzrbjgsmxxajjaf"
+	email = "1533842603@qq.com"
 )
 
 func GetEmailCode() string {
