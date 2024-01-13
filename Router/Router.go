@@ -2,8 +2,43 @@ package Router
 
 import (
 	"HiringSystem/Service"
+	"HiringSystem/Utils"
+	"fmt"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
+	"net/http"
 )
+
+var (
+	secretKey = []byte("your_secret_key") // 替换为实际的密钥
+)
+
+func authMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		fmt.Println("进入鉴权中间件")
+		tokenString := c.GetHeader("Authorization")
+		if tokenString == "" {
+			fmt.Println("无token")
+			c.JSON(200, Utils.Response{http.StatusUnauthorized, "401", "UnAuthorization"})
+			c.Abort()
+			return
+		}
+
+		// 解析并验证JWT令牌
+		_, err := jwt.ParseWithClaims(tokenString, &Utils.Claims{}, func(token *jwt.Token) (interface{}, error) {
+			return secretKey, nil
+		})
+
+		if err != nil {
+			fmt.Println("无效token")
+			c.JSON(200, Utils.Response{http.StatusUnauthorized, "401", "UnAuthorization"})
+			c.Abort()
+			return
+		}
+
+		c.Next()
+	}
+}
 
 func Router() *gin.Engine {
 	r := gin.Default()
@@ -24,6 +59,9 @@ func Router() *gin.Engine {
 
 	r.POST("/HRService/HRLogin", Service.HRLogin)
 	r.POST("/UserService/Login", Service.Login)
+	r.POST("/UserService/Regist", Service.Regist)
+
+	r.Use(authMiddleware())
 
 	HRUser := r.Group("/HRService")
 	{
@@ -39,9 +77,8 @@ func Router() *gin.Engine {
 
 	User := r.Group("/UserService")
 	{
-		User.POST("/Regist", Service.Regist)
 		User.POST("/ApplyJob", Service.ApplyJob)
-		User.GET("FindAllJobs", Service.FindAllJobs)
+		User.POST("FindAllJobs", Service.FindAllJobs)
 		User.POST("/AddResume", Service.AddResume)
 		User.POST("/SearchApplyedJob", Service.SearchApplyedJob)
 	}

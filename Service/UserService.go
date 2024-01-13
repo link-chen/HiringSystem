@@ -25,10 +25,15 @@ func Login(c *gin.Context) {
 	var User Utils.User
 	c.BindJSON(&User)
 	ans := DataBaseService.SimpleUserLogin(User)
+	res, _ := createToken(User.Id, "User")
+	var rw []interface{}
+	rw = append(rw, res)
 	if ans {
-		c.JSON(http.StatusOK, Utils.Response{200, "TrySuccess", "Success"})
+		rw = append(rw, "Success")
+		c.JSON(http.StatusOK, Utils.Response{200, "Success", rw})
 	} else {
-		c.JSON(http.StatusOK, Utils.Response{400, "TrySuccess", "Failed"})
+		rw = append(rw, "Failed")
+		c.JSON(http.StatusOK, Utils.Response{400, "TrySuccess", rw})
 	}
 }
 
@@ -41,21 +46,34 @@ func ApplyJob(c *gin.Context) {
 		return
 	}
 	ResumeExist := DataBaseService.CheckResumeExist(User)
+	res, _ := createToken(User.Id, "User")
+	var rw []interface{}
+	rw = append(rw, res)
 	if ResumeExist {
 		ans := DataBaseService.UserApplyJob(User)
 		if ans {
-			c.JSON(http.StatusOK, Utils.Response{200, "ApplySuccess", "ApplySuccess"})
+			rw = append(rw, "ApplySuccess")
+			c.JSON(http.StatusOK, Utils.Response{200, "ApplySuccess", rw})
 		} else {
-			c.JSON(http.StatusOK, Utils.Response{200, "ApplyFailed", "ApplyFailed"})
+			rw = append(rw, "ApplyFailed")
+			c.JSON(http.StatusOK, Utils.Response{200, "ApplyFailed", rw})
 		}
 	} else {
-		c.JSON(http.StatusOK, Utils.Response{200, "ApplyFailed", "NeedResume"})
+		rw = append(rw, "NeedResume")
+		c.JSON(http.StatusOK, Utils.Response{200, "ApplyFailed", rw})
 	}
 }
 
 func FindAllJobs(c *gin.Context) {
 	ans := DataBaseService.SearchAllJobs()
-	c.JSON(http.StatusOK, Utils.Response{200, "Success", ans})
+	var User Utils.User
+	c.BindJSON(&User)
+	fmt.Println("User.id==", User.Id)
+	res, _ := createToken(User.Id, "User")
+	var rw []interface{}
+	rw = append(rw, res)
+	rw = append(rw, ans)
+	c.JSON(http.StatusOK, Utils.Response{200, "Success", rw})
 }
 
 func AddResume(c *gin.Context) {
@@ -73,10 +91,15 @@ func AddResume(c *gin.Context) {
 	ans := c.PostForm("id")
 	id, _ := strconv.Atoi(ans)
 	res := DataBaseService.AddResumeToUser(id, dst)
+	token, _ := createToken(uint(id), "User")
+	var rw []interface{}
+	rw = append(rw, token)
 	if res {
-		c.JSON(http.StatusOK, Utils.Response{200, "Success", "AddResumeSuccess"})
+		rw = append(rw, "AddResumeSuccess")
+		c.JSON(http.StatusOK, Utils.Response{200, "Success", rw})
 	} else {
-		c.JSON(http.StatusOK, Utils.Response{200, "Success", "AddResumeFailed"})
+		rw = append(rw, "AddResumeFailed")
+		c.JSON(http.StatusOK, Utils.Response{200, "Success", rw})
 	}
 }
 
@@ -84,8 +107,13 @@ func SearchApplyedJob(c *gin.Context) {
 	var User Utils.User
 	c.BindJSON(&User)
 	ans, err := DataBaseService.FindUserApplyJob(User)
+	res, _ := createToken(User.Id, "User")
+	var rw []interface{}
+	rw = append(rw, res)
+	fmt.Println(res)
 	if err == nil {
-		c.JSON(http.StatusOK, Utils.Response{200, "Ok", ans})
+		rw = append(rw, ans)
+		c.JSON(http.StatusOK, Utils.Response{200, "Ok", rw})
 	} else {
 		c.JSON(http.StatusOK, "Error")
 	}

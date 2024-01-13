@@ -11,5 +11,7 @@ type Response struct {
 }
 
 type Claims struct {
+	UserType string
+	UserId   uint
 	jwt.StandardClaims
 }

@@ -18,9 +18,19 @@ var db *gorm.DB
 
 func CreateDataBase() {
 	//第一次执行
-	db.AutoMigrate(&Utils.User{})
-	db.AutoMigrate(&Utils.HRUser{})
-	db.AutoMigrate(&Utils.Job{})
+	hasTable := db.Migrator().HasTable(&Utils.User{})
+	if !hasTable {
+		db.AutoMigrate(&Utils.User{})
+	}
+	hasTable = db.Migrator().HasTable(&Utils.HRUser{})
+	if !hasTable {
+		db.AutoMigrate(&Utils.HRUser{})
+		db.Create(&Utils.HRUser{10000, "123456", "1533842603@qq.com"})
+	}
+	hasTable = db.Migrator().HasTable(&Utils.Job{})
+	if !hasTable {
+		db.AutoMigrate(&Utils.Job{})
+	}
 }
 func InitalDataBase() {
 	Db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
@@ -30,6 +40,7 @@ func InitalDataBase() {
 
 	if Db != nil {
 		db = Db
+		CreateDataBase()
 	}
 }
 
