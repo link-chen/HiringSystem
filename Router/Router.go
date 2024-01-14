@@ -24,6 +24,29 @@ func authMiddleware() gin.HandlerFunc {
 			return
 		}
 
+		//var User Utils.User
+		//var HR Utils.HRUser
+		//c.BindJSON(&User)
+		//c.BindJSON(&HR)
+		//
+		//if User.UId != 0 {
+		//	fmt.Println("Redis中无数据")
+		//	ans := DataBaseService.CheckToken(strconv.Itoa(int(User.UId)), tokenString)
+		//	fmt.Println(ans)
+		//	if !ans {
+		//		c.JSON(200, Utils.Response{http.StatusUnauthorized, "401", "UnAuthorization"})
+		//		c.Abort()
+		//		return
+		//	}
+		//} else if HR.HId != 0 {
+		//	ans := DataBaseService.CheckToken(strconv.Itoa(int(HR.HId)), tokenString)
+		//	if !ans {
+		//		c.JSON(200, Utils.Response{http.StatusUnauthorized, "401", "UnAuthorization"})
+		//		c.Abort()
+		//		return
+		//	}
+		//}
+
 		// 解析并验证JWT令牌
 		_, err := jwt.ParseWithClaims(tokenString, &Utils.Claims{}, func(token *jwt.Token) (interface{}, error) {
 			return secretKey, nil
@@ -36,6 +59,7 @@ func authMiddleware() gin.HandlerFunc {
 			return
 		}
 
+		fmt.Println("鉴权中间件处理完成，进入处理下一个阶段")
 		c.Next()
 	}
 }

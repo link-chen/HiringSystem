@@ -17,7 +17,7 @@ type User struct {
 }
 
 type HRUser struct {
-	Id       uint   `gorm:"primaryKey"`
+	HId      uint   `gorm:"primaryKey"`
 	Password string `json:"Password"`
 	Email    string `json:"Email"`
 }

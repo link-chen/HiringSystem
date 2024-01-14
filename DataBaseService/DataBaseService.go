@@ -65,7 +65,7 @@ func DeleteJobFromDataBase(job Utils.Job) bool {
 
 func GetJobsPostedByHR(user Utils.HRUser) []Utils.Job {
 	var Jobs []Utils.Job
-	db.Where("posted_by=?", user.Id).Find(&Jobs)
+	db.Where("posted_by=?", user.HId).Find(&Jobs)
 	return Jobs
 }
 
@@ -124,7 +124,6 @@ func GetResumeAddress(user Utils.User) string {
 	} else {
 
 	}
-	fmt.Println(ans.RowsAffected)
 	return user.ResumeAddress
 }
 
@@ -193,7 +192,7 @@ func CheckResumeExist(user Utils.User) bool {
 
 func HRLogin(user Utils.HRUser) bool {
 	pass := user.Password
-	ans := db.Where("id=?", user.Id).Find(&user)
+	ans := db.Where("h_id=?", user.HId).Find(&user)
 	if ans.RowsAffected == 0 {
 		return false
 	}

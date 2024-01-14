@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"time"
 )
 
 func Regist(c *gin.Context) {
@@ -28,6 +29,7 @@ func Login(c *gin.Context) {
 	res, _ := createToken(User.UId, "User")
 	var rw []interface{}
 	rw = append(rw, res)
+	DataBaseService.SetKey(strconv.Itoa(int(User.UId)), res, 10*time.Minute)
 	if ans {
 		rw = append(rw, "Success")
 		c.JSON(http.StatusOK, Utils.Response{200, "Success", rw})
@@ -75,6 +77,7 @@ func FindAllJobs(c *gin.Context) {
 	var rw []interface{}
 	rw = append(rw, res)
 	rw = append(rw, ans)
+	fmt.Println("1111")
 	c.JSON(http.StatusOK, Utils.Response{200, "Success", rw})
 }
 
@@ -114,6 +117,8 @@ func SearchApplyedJob(c *gin.Context) {
 	var rw []interface{}
 	rw = append(rw, res)
 	fmt.Println(res)
+	fmt.Println("SearchApplyedJobs")
+	DataBaseService.SetKey(strconv.Itoa(int(User.UId)), res, 10*time.Minute)
 	if err == nil {
 		rw = append(rw, ans)
 		c.JSON(http.StatusOK, Utils.Response{200, "Ok", rw})
