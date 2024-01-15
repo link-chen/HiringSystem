@@ -8,6 +8,10 @@ Build by go language.
 
 Use mysql 8.0.34 Community.
 
+## How to build
+
+Before you start this project,please make sure that mysql and redis were installed in your environment.
+
 You need to create a database named HiringSystem,we default the password for the root user to be 123456. So the  code of open mysql are shown like this:
 
 ```
@@ -33,7 +37,7 @@ You can change the configeration of the database whenever you want,just need to 
 
 We have provide the  go.mod and go.sum,you don't need to create it again.
 
-Before you build this project,please instead the email count and email code in ../Config/EmailConfig.go file
+Before you build this project,please instead the email count and email code in ./Config/EmailConfig.go file
 
 You need to write your own email count and code here:
 
@@ -45,27 +49,11 @@ const (
 )
 ```
 
-When you first execute this program,use this code:
+if nothing was wroten in EmailConfig.go,the project will work as usual but it can't send email when you want to hiring or employ someone.
 
-```
-func main() {
-	DataBaseService.InitalDataBase()
-	DataBaseService.CreateDataBase()
-}
-```
+## About the front-end
 
-This code will help you create table in mysql.
-
-And then,please replace the code with this:
-
-```
-func main() {
-	DataBaseService.InitalDataBase()
-	Utils.CreateDir("Resume")
-	r := Router.Router()
-	r.Run()
-}
-```
+The front-end of this project is based on vue3.
 
 Here is the link to the front-end repository:
 
