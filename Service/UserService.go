@@ -4,7 +4,9 @@ import (
 	"HiringSystem/DataBaseService"
 	"HiringSystem/Utils"
 	"fmt"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 	"net/http"
 	"os"
 	"strconv"
@@ -41,7 +43,7 @@ func Login(c *gin.Context) {
 
 func ApplyJob(c *gin.Context) {
 	var User Utils.User
-	c.BindJSON(&User)
+	c.ShouldBindBodyWith(&User, binding.JSON)
 	fmt.Println("User.Uid==", User.UId)
 	exist := DataBaseService.FindUserJobId(User)
 	if exist != 0 {
@@ -53,6 +55,7 @@ func ApplyJob(c *gin.Context) {
 	res, _ := createToken(User.UId, "User")
 	var rw []interface{}
 	rw = append(rw, res)
+	DataBaseService.SetKey(strconv.Itoa(int(User.UId)), res, 10*time.Minute)
 	if ResumeExist {
 		ans := DataBaseService.UserApplyJob(User)
 		if ans {
@@ -71,17 +74,41 @@ func ApplyJob(c *gin.Context) {
 func FindAllJobs(c *gin.Context) {
 	ans := DataBaseService.SearchAllJobs()
 	var User Utils.User
-	c.BindJSON(&User)
+	c.ShouldBindBodyWith(&User, binding.JSON)
 	fmt.Println("User.id==", User.UId)
 	res, _ := createToken(User.UId, "User")
 	var rw []interface{}
 	rw = append(rw, res)
 	rw = append(rw, ans)
+	DataBaseService.SetKey(strconv.Itoa(int(User.UId)), res, 10*time.Minute)
 	fmt.Println("1111")
 	c.JSON(http.StatusOK, Utils.Response{200, "Success", rw})
 }
 
 func AddResume(c *gin.Context) {
+	tokenString := c.GetHeader("Authorization")
+	if tokenString == "" {
+		fmt.Println("无token")
+		c.JSON(200, Utils.Response{http.StatusUnauthorized, "401", "UnAuthorization"})
+		c.Abort()
+		return
+	}
+	ans := c.PostForm("uid")
+	checkResult := DataBaseService.CheckToken(ans, tokenString)
+	if !checkResult {
+		c.JSON(200, Utils.Response{http.StatusUnauthorized, "401", "UnAuthorization"})
+		c.Abort()
+		return
+	}
+	_, err := jwt.ParseWithClaims(tokenString, &Utils.Claims{}, func(token *jwt.Token) (interface{}, error) {
+		return secretKey, nil
+	})
+	if err != nil {
+		fmt.Println("无效token")
+		c.JSON(200, Utils.Response{http.StatusUnauthorized, "401", "UnAuthorization"})
+		c.Abort()
+		return
+	}
 	file, _ := c.FormFile("file")
 	fmt.Println(file.Filename)
 	currentDir, err := os.Getwd()
@@ -93,12 +120,12 @@ func AddResume(c *gin.Context) {
 	if err := c.SaveUploadedFile(file, dst); err != nil {
 		return
 	}
-	ans := c.PostForm("uid")
 	id, _ := strconv.Atoi(ans)
 	res := DataBaseService.AddResumeToUser(id, dst)
 	token, _ := createToken(uint(id), "User")
 	var rw []interface{}
 	rw = append(rw, token)
+	DataBaseService.SetKey(strconv.Itoa(id), token, 10*time.Minute)
 	if res {
 		rw = append(rw, "AddResumeSuccess")
 		c.JSON(http.StatusOK, Utils.Response{200, "Success", rw})
@@ -110,8 +137,7 @@ func AddResume(c *gin.Context) {
 
 func SearchApplyedJob(c *gin.Context) {
 	var User Utils.User
-	c.BindJSON(&User)
-	fmt.Println("User.Uid==", User.UId)
+	c.ShouldBindBodyWith(&User, binding.JSON)
 	ans, err := DataBaseService.FindUserApplyJob(User)
 	res, _ := createToken(User.UId, "User")
 	var rw []interface{}
