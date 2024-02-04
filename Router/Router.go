@@ -29,14 +29,24 @@ func authMiddleware() gin.HandlerFunc {
 		var HR Utils.HRUser
 		c.ShouldBindBodyWith(&User, binding.JSON)
 		c.ShouldBindBodyWith(&HR, binding.JSON)
-		if User.UId != 0 {
+		if HR.HId != 0 && User.UId != 0 {
+			ans := DataBaseService.CheckToken(strconv.Itoa(int(HR.HId)), tokenString)
+			fmt.Println(ans)
+			if !ans {
+				c.JSON(200, Utils.Response{http.StatusUnauthorized, "401", "UnAuthorization"})
+				c.Abort()
+				return
+			}
+		} else if User.UId != 0 {
 			ans := DataBaseService.CheckToken(strconv.Itoa(int(User.UId)), tokenString)
+			fmt.Println("User")
 			if !ans {
 				c.JSON(200, Utils.Response{http.StatusUnauthorized, "401", "UnAuthorization"})
 				c.Abort()
 				return
 			}
 		} else if HR.HId != 0 {
+			fmt.Println("HR")
 			ans := DataBaseService.CheckToken(strconv.Itoa(int(HR.HId)), tokenString)
 			if !ans {
 				c.JSON(200, Utils.Response{http.StatusUnauthorized, "401", "UnAuthorization"})

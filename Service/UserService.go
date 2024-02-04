@@ -43,6 +43,7 @@ func Login(c *gin.Context) {
 
 func ApplyJob(c *gin.Context) {
 	var User Utils.User
+	fmt.Println("User.Uid==")
 	c.ShouldBindBodyWith(&User, binding.JSON)
 	fmt.Println("User.Uid==", User.UId)
 	exist := DataBaseService.FindUserJobId(User)
@@ -81,7 +82,6 @@ func FindAllJobs(c *gin.Context) {
 	rw = append(rw, res)
 	rw = append(rw, ans)
 	DataBaseService.SetKey(strconv.Itoa(int(User.UId)), res, 10*time.Minute)
-	fmt.Println("1111")
 	c.JSON(http.StatusOK, Utils.Response{200, "Success", rw})
 }
 
@@ -146,9 +146,11 @@ func SearchApplyedJob(c *gin.Context) {
 	fmt.Println("SearchApplyedJobs")
 	DataBaseService.SetKey(strconv.Itoa(int(User.UId)), res, 10*time.Minute)
 	if err == nil {
+		fmt.Println("SearchApplyJobsSuccess")
 		rw = append(rw, ans)
 		c.JSON(http.StatusOK, Utils.Response{200, "Ok", rw})
 	} else {
+		fmt.Println("SearchApplyJobsFailed")
 		c.JSON(http.StatusOK, "Error")
 	}
 }

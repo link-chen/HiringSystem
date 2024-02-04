@@ -5,19 +5,23 @@ import (
 	"HiringSystem/Utils"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 	"net/http"
+	"strconv"
+	"time"
 )
 
 func AddJob(c *gin.Context) {
 	//传入Job，但可以通过Job.PostedBy反推HR
 	var Job Utils.Job
-	c.BindJSON(&Job)
+	c.ShouldBindBodyWith(&Job, binding.JSON)
 	fmt.Println(Job)
 	if &Job != nil {
 		ans := DataBaseService.AddJobToDataBase(Job)
 		res, _ := createToken(Job.PostedBy, "HR")
 		var rw []interface{}
 		rw = append(rw, res)
+		DataBaseService.SetKey(strconv.Itoa(int(Job.PostedBy)), res, 10*time.Minute)
 		if ans {
 			rw = append(rw, "AddSuccess")
 			c.JSON(http.StatusOK, Utils.Response{http.StatusOK, "Success", rw})
@@ -33,12 +37,13 @@ func AddJob(c *gin.Context) {
 func DeleteJob(c *gin.Context) {
 	//传入Job，但可以通过Job.PostedBy反推HR
 	var Job Utils.Job
-	c.BindJSON(&Job)
+	c.ShouldBindBodyWith(&Job, binding.JSON)
 	fmt.Println(Job)
 	ans := DataBaseService.DeleteJobFromDataBase(Job)
 	res, _ := createToken(Job.PostedBy, "HR")
 	var rw []interface{}
 	rw = append(rw, res)
+	DataBaseService.SetKey(strconv.Itoa(int(Job.PostedBy)), res, 10*time.Minute)
 	if !ans {
 		rw = append(rw, "Failed To DeleteJob")
 		c.JSON(http.StatusOK, Utils.Response{404, "Failed", rw})
@@ -58,9 +63,11 @@ func GetPostedJobRequester(c *gin.Context) {
 func GetJobsPosted(c *gin.Context) {
 	//传入HR
 	var HRUser Utils.HRUser
-	c.BindJSON(&HRUser)
+	c.ShouldBindBodyWith(&HRUser, binding.JSON)
 	ans := DataBaseService.GetJobsPostedByHR(HRUser)
 	res, _ := createToken(HRUser.HId, "HR")
+	fmt.Println("HRUser.HId==", HRUser.HId)
+	DataBaseService.SetKey(strconv.Itoa(int(HRUser.HId)), res, 10*time.Minute)
 	var rw []interface{}
 	rw = append(rw, res)
 	if ans != nil {
@@ -72,20 +79,30 @@ func GetJobsPosted(c *gin.Context) {
 func GetAppliersByJobId(c *gin.Context) {
 	//传入User
 	var User Utils.User
-	c.BindJSON(&User)
+	var HRUser Utils.HRUser
+	c.ShouldBindBodyWith(&User, binding.JSON)
+	c.ShouldBindBodyWith(&HRUser, binding.JSON)
+	fmt.Println(User)
 	ans := DataBaseService.FindUsersByJobId(User)
-	c.JSON(http.StatusOK, Utils.Response{200, "Success", ans})
+	fmt.Println(ans)
+	res, _ := createToken(HRUser.HId, "HR")
+	DataBaseService.SetKey(strconv.Itoa(int(HRUser.HId)), res, 10*time.Minute)
+	var rw []interface{}
+	rw = append(rw, res)
+	rw = append(rw, ans)
+	c.JSON(http.StatusOK, Utils.Response{200, "Success", rw})
 }
 
 func GetApplyerResume(c *gin.Context) {
 	//传入User
 	var User Utils.User
 	var HR Utils.HRUser
-	c.BindJSON(&User)
+	c.ShouldBindBodyWith(&User, binding.JSON)
 	fmt.Println(User)
 	res, _ := createToken(HR.HId, "HR")
 	var rw []interface{}
 	rw = append(rw, res)
+	DataBaseService.SetKey(strconv.Itoa(int(HR.HId)), res, 10*time.Minute)
 	file := DataBaseService.GetResumeAddress(User)
 	c.File(file)
 }
@@ -93,7 +110,7 @@ func GetApplyerResume(c *gin.Context) {
 func EmployeeApplyer(c *gin.Context) {
 	//传入User
 	var User Utils.User
-	c.BindJSON(&User)
+	c.ShouldBindBodyWith(&User, binding.JSON)
 	Email := DataBaseService.GetEmail(User)
 	if Email != "" {
 		DataBaseService.CleanUserApply(User)
@@ -105,7 +122,7 @@ func EmployeeApplyer(c *gin.Context) {
 func NotEmployeeApplyer(c *gin.Context) {
 	//传入User
 	var User Utils.User
-	c.BindJSON(&User)
+	c.ShouldBindBodyWith(&User, binding.JSON)
 	Email := DataBaseService.GetEmail(User)
 	if Email != "" {
 		Utils.SendFailedEmail(Email)
@@ -123,6 +140,7 @@ func HRLogin(c *gin.Context) {
 	res, _ := createToken(user.HId, "HR")
 	var rw []interface{}
 	rw = append(rw, res)
+	DataBaseService.SetKey(strconv.Itoa(int(user.HId)), res, 10*time.Minute)
 	if ans {
 		//中间件，添加数据toekn
 		rw = append(rw, "Success")
